@@ -16,4 +16,3 @@ class App extends Component {
 }
 
 export default AuthHOC(App);
-// export default App;

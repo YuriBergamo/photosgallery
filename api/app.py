@@ -2,7 +2,7 @@ from flask import Flask, jsonify, url_for, redirect, request
 from flask_pymongo import PyMongo
 from flask_restful import Api, Resource
 from flask_cors import CORS
-
+from bson import ObjectId
 from utils import DefaultResponse
 
 app = Flask(__name__)
@@ -56,7 +56,7 @@ class User(Resource):
 
 
 def getUserType(id_user):
-    user_logged = mongo.db.user.find_one({"_id": id_user})
+    user_logged = mongo.db.user.find_one({"_id": ObjectId(id_user)})
     if user_logged:
         return user_logged.get("type")
 
@@ -71,33 +71,48 @@ class Photo(Resource):
         if type_of_user:
             if type_of_user == 'friend':
                 # find just the photos that user uploads and all photos approved by the bride
-                photos_cursor = mongo.db.photos.find({
-                    '$or': [
-                        {
-                            'user_id': id_user
-                        },
-                        {
-                            'approved': True
-                        }
-                    ]
-                })
+                photos_cursor = mongo.db.photo.find({"$or": [
+                    {
+                        'user_id': id_user
+                    },
+                    {
+                        "approved":True
+                    }
+                ]})
+
             else:
-                photos_cursor = mongo.db.photos.find({})
-        # user isn't find
+                photos_cursor = mongo.db.photo.find({})
+
         if photos_cursor:
             for photo in photos_cursor:
                 data.append(photo)
-            return DefaultResponse().getOk(data)
+
+            if data:
+                return DefaultResponse().getOk(data)
 
         return DefaultResponse().getError("Erro to find the photos", "404")
 
     def post(self):
         new_photo = request.get_json()
-        # TODO validate if have an image
-        user = mongo.photo.insert(new_photo)
-        return DefaultResponse().getOk(user)
+        if new_photo:
+            if new_photo.get('user_id'):
+                type_of_user = getUserType(new_photo.get('user_id'))
+                if not type_of_user == 'friend':
+                    # just put the approved check because is the admin
+                    new_photo["approved"] = True
+                else:
+                    new_photo["approved"] = False
 
-    def put(self, id_user):
+                photo_db = mongo.db.photo.insert(new_photo)
+                if photo_db:
+                    return DefaultResponse().getOk(mongo.db.photo.find_one({"_id": photo_db}))
+            else:
+                return DefaultResponse().getError("User not allowed to upload new photos!", "401")
+        return DefaultResponse().getError("Invalid photo", "500")
+
+
+class PhotoApproved(Resource):
+    def post(self, id_user):
         # this method set the approved
         # only call by the admin (bride)
         photo_approved = request.get_json()
@@ -105,11 +120,27 @@ class Photo(Resource):
             type_of_user = getUserType(id_user)
             if type_of_user and not type_of_user == 'friend':
                 # it's the admin, set the approved
-                mongo.db.photos.update({'_id': photo_approved.get("_id")}, {'$set': photo_approved})
+                photo_db = mongo.db.photo.find_one({'_id': ObjectId(photo_approved.get("id"))})
+                photo_db["approved"] = True
+                mongo.db.photo.update({'_id': ObjectId(photo_db.get("_id"))}, {'$set': photo_db})
                 return DefaultResponse().getOk(True)
             else:
                 return DefaultResponse().getError("You don't have a permission to approve photos!", "403")
 
+        return DefaultResponse().getError("Invalid photo!", "500")
+
+
+class PhotoLike(Resource):
+    def post(self):
+        # this method ++ the likes in database
+        photo_to_like = request.get_json()
+        if photo_to_like:
+            photo_db = mongo.db.photo.find_one({'_id': ObjectId(photo_to_like.get("id"))})
+            if photo_db:
+                likes = int(photo_db["likes"]) + 1
+                photo_db["likes"] = likes
+                mongo.db.photo.update({'_id': ObjectId(photo_db.get("_id"))}, {"$set": photo_db})
+                return DefaultResponse().getOk({"photo_id": photo_db.get("_id"), "likes": likes})
         return DefaultResponse().getError("Invalid photo!", "500")
 
 
@@ -122,7 +153,10 @@ api = Api(app)
 api.add_resource(Index, "/api", endpoint="index")
 api.add_resource(Login, "/api/login", endpoint="login")
 api.add_resource(User, "/api/users", endpoint="users")
-api.add_resource(Photo, "/api/photos/<string:id_user>", endpoint="photos")
+api.add_resource(Photo, "/api/photos", endpoint="photos")
+api.add_resource(Photo, "/api/photos/<string:id_user>", endpoint="user")
+api.add_resource(PhotoApproved, "/api/photos/approve/<string:id_user>", endpoint="approve")
+api.add_resource(PhotoLike, "/api/photos/like", endpoint="like")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -15,5 +15,4 @@ class App extends Component {
   }
 }
 
-// export default AuthHOC(App);
-export default App;
+export default AuthHOC(App);

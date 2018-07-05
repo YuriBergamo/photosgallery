@@ -4,6 +4,8 @@ import logo from '../assets/login_icon.png';
 
 //services
 import AuthenticationService from './components/services/AuthenticationService'
+import Connection from "./connections/Connection";
+
 
 
 class Logon extends Component{
@@ -18,14 +20,34 @@ class Logon extends Component{
 
     handleFormSubmit(e){
         e.preventDefault();
-        console.log(this.state.username  + " - " + this.state.password);
-        this.Auth.login(this.state.username,this.state.password)
-            .then(res =>{
-                this.props.history.replace('/');
+        console.log(this.state);
+        if(this.state.password == this.state.password2){
+            // create the user
+            let newUser = {
+                "username": this.state.username,
+                "password": this.state.password,
+                "type": this.state.typeUser
+            };
+
+            Connection.post("/users", newUser).then(res =>{
+                console.log("OK", res);
+                // create the authentication
+                this.Auth.login(res.username,res.password)
+                    .then(ok =>{
+                        this.props.history.replace('/');
+                    })
+                    .catch(err =>{
+                        alert(err);
+                    });
+
+            }).catch(error =>{
+                alert(error)
             })
-            .catch(err =>{
-                alert(err);
-            })
+        }else{
+            alert("The passwords aren't equals");
+        }
+
+
     }
 
     handleChange(event) {
@@ -36,11 +58,6 @@ class Logon extends Component{
         this.setState({
             [name]: value
         });
-    }
-
-    componentWillMount(){
-        if(this.Auth.loggedIn())
-            this.props.history.replace('/');
     }
 
     render(){
@@ -90,7 +107,7 @@ class Logon extends Component{
                                        name="password2"
                                        onChange={this.handleChange}
                                        type="password"
-                                       value={this.state.password}/>
+                                       value={this.state.password2}/>
                                 <span className="icon is-small is-right">
                                     <i className="fa fa-key"></i>
                                   </span>
@@ -100,9 +117,9 @@ class Logon extends Component{
                             <label className="label">Type*</label>
                             <div className="control select is-fullwidth">
                                 <select
-                                    name="type"
+                                    name="typeUser"
                                     required
-                                    value={this.state.type}
+                                    value={this.state.typeUser}
                                     onChange={this.handleChange}>
                                     <option value="bride">Bride</option>
                                     <option value="bridegroom">Bridegroom</option>

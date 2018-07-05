@@ -50,8 +50,6 @@ class Login extends Component{
     }
 
     render(){
-
-
         return (
             <div className="columns is-vcentered">
                 <div className="login column is-4 ">

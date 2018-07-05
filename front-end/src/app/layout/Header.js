@@ -1,7 +1,14 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import AuthenticationService from "../components/services/AuthenticationService";
+
 
 class Header extends React.Component {
+
+    constructor(){
+        super()
+        this.singOut = this.singOut.bind(this);
+    }
 
     state = {
         isActive: false,
@@ -13,10 +20,17 @@ class Header extends React.Component {
         }))
     };
 
+    singOut = (e) =>{
+        e.preventDefault();
+        new AuthenticationService().logout();
+        window.location = '/login';
+    };
+
     render() {
         return (
-            <nav className="navbar has-shadow is-primary"
+            <nav className="navbar is-primary"
                     aria-label="main navigation">
+
                 <div className="navbar-brand">
                     <NavLink
                         activeClassName="is-active"
@@ -24,31 +38,15 @@ class Header extends React.Component {
                         className="navbar-item">
                         <span className="header_title">Photo Gallery</span>
                     </NavLink>
-                    <button className="button navbar-burger header_nav" onClick={this.toggleNav}>
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
                 </div>
                 <div className={ this.state.isActive ? 'navbar-menu is-active' : 'navbar-menu'}>
-                    <div className="navbar-start">
-                        <a className="navbar-item">
-                          <span className="icon" style={{ marginRight: 5 }}>
-                            <i className="fa fa-upload"></i>
-                          </span>
-                            Upload new photos
-                        </a>
-                    </div>
                     <div className="navbar-end">
-                        <NavLink
-                            activeClassName="is-active"
-                            to="aboutus"
-                            className="navbar-item">
+                        <a className="navbar-item" onClick={this.singOut}>
                           <span className="icon" style={{ marginRight: 5 }}>
-                            <i className="fas fa-fire"></i>
+                            <i className="fa fa-times"></i>
                           </span>
-                          To Approved
-                        </NavLink>
+                            Logout
+                        </a>
                     </div>
                 </div>
             </nav>

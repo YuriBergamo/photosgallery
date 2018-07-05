@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, url_for, redirect, request
 from flask_pymongo import PyMongo
 from flask_restful import Api, Resource
@@ -8,8 +9,9 @@ from utils import DefaultResponse
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config["MONGO_DBNAME"] = "photosgallery"
+app.config["MONGO_URI"] = "mongodb://" + os.environ['DB_PORT_27017_TCP_ADDR'] + ":27017/photosgallery"
 mongo = PyMongo(app, config_prefix='MONGO')
-APP_URL = "http://localhost:5000"
+APP_URL = "http://localhost:8000"
 
 
 class Login(Resource):
@@ -159,4 +161,4 @@ api.add_resource(PhotoApproved, "/api/photos/approve/<string:id_user>", endpoint
 api.add_resource(PhotoLike, "/api/photos/like", endpoint="like")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8000)

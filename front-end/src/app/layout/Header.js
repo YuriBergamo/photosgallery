@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import Upload from "../components/Upload";
 
 class Header extends React.Component {
 
@@ -13,10 +14,16 @@ class Header extends React.Component {
         }))
     };
 
+    openUploadModal = (e) =>{
+        e.preventDefault();
+        this.state.modal = "is-active";
+    };
+
     render() {
         return (
             <nav className="navbar has-shadow is-primary"
                     aria-label="main navigation">
+
                 <div className="navbar-brand">
                     <NavLink
                         activeClassName="is-active"
@@ -32,7 +39,7 @@ class Header extends React.Component {
                 </div>
                 <div className={ this.state.isActive ? 'navbar-menu is-active' : 'navbar-menu'}>
                     <div className="navbar-start">
-                        <a className="navbar-item">
+                        <a className="navbar-item" onClick={this.openUploadModal}>
                           <span className="icon" style={{ marginRight: 5 }}>
                             <i className="fa fa-upload"></i>
                           </span>

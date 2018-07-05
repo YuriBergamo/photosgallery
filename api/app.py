@@ -1,12 +1,15 @@
 from flask import Flask, jsonify, url_for, redirect, request
 from flask_pymongo import PyMongo
 from flask_restful import Api, Resource
+from flask_cors import CORS
+
 from utils import DefaultResponse
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config["MONGO_DBNAME"] = "photosgallery"
 mongo = PyMongo(app, config_prefix='MONGO')
-APP_URL = "http://127.0.0.1:5000"
+APP_URL = "http://localhost:5000"
 
 
 class Login(Resource):
@@ -46,8 +49,10 @@ class User(Resource):
                     # find a bride or bridegoom
                     return DefaultResponse().getError("Already have an user with this type!", "404")
 
-            user = mongo.user.insert(new_user)
-            return DefaultResponse().getOk(user)
+            user = mongo.db.user.insert(new_user)
+            if user:
+                return DefaultResponse().getOk(mongo.db.user.find_one({"_id": user}))
+        return DefaultResponse().getError("Invalid user", "500")
 
 
 def getUserType(id_user):

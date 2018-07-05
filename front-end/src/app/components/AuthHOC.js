@@ -17,9 +17,9 @@ export default function AuthHOC(AuthComponent){
                 this.props.history.replace('/login')
             }else {
                 try {
-                    const profile = Auth.getProfile();
+                    const user = Auth.getToken();
                     this.setState({
-                        user: profile
+                        user: user
                     })
                 }
                 catch(err){

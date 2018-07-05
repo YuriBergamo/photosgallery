@@ -1,28 +1,49 @@
 import React, {Component} from 'react'
 import CardDashboard from './components/CardDashboard'
 import NoImages from './components/NoImages'
+import Upload from "./components/Upload";
 
 
 class Home extends Component {
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            modalState: false
+        };
+
+        this.toggleModal = this.toggleModal.bind(this);
+    }
+
+    toggleModal() {
+        this.setState((prev, props) => {
+            const newState = !prev.modalState;
+
+            return { modalState: newState };
+        });
+        console.log(this.state)
+    }
+
     render() {
         //TODO change that code to get de server response
         let cards = [];
-        for(let i=0; i<6; i++){
-            cards.push(<CardDashboard
-                likes={i}
-                image="https://images.unsplash.com/photo-1475778057357-d35f37fa89dd?dpr=1&auto=compress,format&fit=crop&w=1920&h=&q=80&cs=tinysrgb&crop=" />);
-        }
-
-        console.log(cards);
         if(cards.length == 0){
             //show an message to upload new photos.
             return (
-                <NoImages />
+                <div>
+                    <Upload modalState={this.state.modalState} />
+                    <a className="button is-primary" onClick={this.toggleModal}>
+                        Open Modal
+                    </a>
+                    <NoImages />
+                </div>
             );
         }
+
         return(
             <section class="container" style={{ marginBottom:"20px"}}>
+                <Upload modalState={this.state.modalState} />
                 <div class="row columns is-multiline">
                     {cards}
                 </div>

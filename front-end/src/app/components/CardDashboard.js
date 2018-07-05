@@ -31,6 +31,24 @@ class CardDashboard extends React.Component {
                         </figure>
                     </div>
                     <div className="card-content">
+                        {/*<div class="level is-mobile">*/}
+                            {/*<div class="level-left">*/}
+                                {/*<div class="level-item has-text-centered">*/}
+                                    {/*<a href="">*/}
+                                        {/*<FavoriteBorderIcon/>*/}
+                                        {/*/!*<i class="material-icons">favorite_border</i>*!/*/}
+                                    {/*</a>*/}
+                                {/*</div>*/}
+                                {/*<div class="level-item has-text-centered">*/}
+                                    {/*<div>*/}
+                                        {/*<a href="">*/}
+                                            {/*<ChatIcon/>*/}
+                                            {/*/!*<i class="material-icons">chat_bubble_outline</i>*!/*/}
+                                        {/*</a>*/}
+                                    {/*</div>*/}
+                                {/*</div>*/}
+                            {/*</div>*/}
+                        {/*</div>*/}
                         <div className="media">
                             <a className="button is-danger is-outlined" style={{width:"100%"}}>
                                 <span>{this.getLikes()} Likes </span>

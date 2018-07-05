@@ -1,7 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 
-const URL_API = 'http://localhost:5000/api';
+const URL_API = 'http://ec2-18-222-45-220.us-east-2.compute.amazonaws.com:8000/api';
 
 function get(url) {
     return axios.get(URL_API + url);
